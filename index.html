@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Singatu best Camera</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: #e0f7fa;
+    }
+    video, canvas {
+      max-width: 100%;
+      border: 2px solid #00796b;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    button {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+  </style>
+</head>
+<body>
+  <h1>Singatu Camera</h1>
+  <video id="video" autoplay playsinline></video><br>
+  <button id="capture">Snap It!</button>
+  <button id="download" style="display:none;">Download Photo</button>
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture');
+    const downloadBtn = document.getElementById('download');
+
+    // Access camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert('Camera access denied: ' + err.message);
+      });
+
+    // Capture photo
+    captureBtn.addEventListener('click', () => {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.style.display = 'block';
+      downloadBtn.style.display = 'inline-block';
+    });
+
+    // Download captured image
+    downloadBtn.addEventListener('click', () => {
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'captured_photo.png';
+      link.click();
+    });
+  </script>
+</body>
+  </html>
