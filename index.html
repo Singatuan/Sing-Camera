@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Singatu best Camera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Singatu Camera</title>
   <style>
     body {
       font-family: sans-serif;
@@ -12,6 +13,7 @@
       background: #e0f7fa;
     }
     video, canvas {
+      width: 100%;
       max-width: 100%;
       border: 2px solid #00796b;
       border-radius: 8px;
@@ -19,13 +21,14 @@
     }
     button {
       margin: 10px 5px;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 15px 25px;
+      font-size: 18px;
       background-color: #00796b;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      touch-action: manipulation;
     }
     button:hover {
       background-color: #004d40;
@@ -34,8 +37,9 @@
 </head>
 <body>
   <h1>Singatu Camera</h1>
-  <video id="video" autoplay playsinline></video><br>
-  <button id="capture">Snap It!</button>
+  <p id="status">Loading camera...</p>
+  <video id="video" autoplay playsinline muted></video><br>
+  <button id="capture" disabled>Snap It!</button>
   <button id="download" style="display:none;">Download Photo</button>
   <canvas id="canvas" style="display: none;"></canvas>
 
@@ -44,17 +48,19 @@
     const canvas = document.getElementById('canvas');
     const captureBtn = document.getElementById('capture');
     const downloadBtn = document.getElementById('download');
+    const statusText = document.getElementById('status');
 
-    // Access camera
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
         video.srcObject = stream;
-      })
-      .catch(err => {
-        alert('Camera access denied: ' + err.message);
-      });
+        statusText.textContent = '';
+        captureBtn.disabled = false;
+      } catch (err) {
+        statusText.textContent = 'Camera access denied or not available: ' + err.message;
+      }
+    }
 
-    // Capture photo
     captureBtn.addEventListener('click', () => {
       const context = canvas.getContext('2d');
       canvas.width = video.videoWidth;
@@ -64,14 +70,15 @@
       downloadBtn.style.display = 'inline-block';
     });
 
-    // Download captured image
     downloadBtn.addEventListener('click', () => {
-      const image = canvas.toDataURL("image/png");
+      const image = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = image;
       link.download = 'captured_photo.png';
       link.click();
     });
+
+    window.addEventListener('load', startCamera);
   </script>
 </body>
-  </html>
+</html>
