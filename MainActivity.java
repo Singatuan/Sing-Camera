@@ -1,4 +1,4 @@
-package com.singcamera; 
+package="com.sing.camerapp">
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -19,9 +19,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Uses activity_main.xml layout
+        setContentView(R.layout.activity_main); 
 
-        // Request camera permission if not granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.setWebViewClient(new WebViewClient());
 
-        // Enable camera/microphone permissions
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -43,18 +41,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Load local HTML file from assets
         webView.loadUrl("file:///android_asset/index.html");
     }
 
-    // Optional: handle permission result (future logic if needed)
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions,
                                            int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            // You can handle permission result here if needed
-        }
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) 
+            
     }
   }
