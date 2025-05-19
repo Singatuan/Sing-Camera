@@ -4,9 +4,13 @@
   <title> CameraSing (Front/Back)</title>
 </head>
 <body>
-  <h2>Camera </h2>
+  <h2>CameraSing </h2>
   <select id="cameraSelect"></select>
   <video id="video" autoplay playsinline width="640" height="480"></video>
+  <video id="video" autoplay playsinline></video><br>
+  <button id="capture">Snap It!</button>
+  <button id="download" style="display:none;">Download Photo</button>
+  <canvas id="canvas" style="display: none;"></canvas>
 
   <script>
     let currentStream;
