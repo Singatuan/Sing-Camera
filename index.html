@@ -1,84 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Singatu Camera</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-      background: #e0f7fa;
-    }
-    video, canvas {
-      width: 100%;
-      max-width: 100%;
-      border: 2px solid #00796b;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    button {
-      margin: 10px 5px;
-      padding: 15px 25px;
-      font-size: 18px;
-      background-color: #00796b;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-    button:hover {
-      background-color: #004d40;
-    }
-  </style>
+  <title> CameraSing (Front/Back)</title>
 </head>
 <body>
-  <h1>Singatu Camera</h1>
-  <p id="status">Loading camera...</p>
-  <video id="video" autoplay playsinline muted></video><br>
-  <button id="capture" disabled>Snap It!</button>
-  <button id="download" style="display:none;">Download Photo</button>
-  <canvas id="canvas" style="display: none;"></canvas>
+  <h2>Camera </h2>
+  <select id="cameraSelect"></select>
+  <video id="video" autoplay playsinline width="640" height="480"></video>
 
   <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const captureBtn = document.getElementById('capture');
-    const downloadBtn = document.getElementById('download');
-    const statusText = document.getElementById('status');
+    let currentStream;
 
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        video.srcObject = stream;
-        statusText.textContent = '';
-        captureBtn.disabled = false;
-      } catch (err) {
-        statusText.textContent = 'Camera access denied or not available: ' + err.message;
+    async function getCameras() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const cameraSelect = document.getElementById('cameraSelect');
+
+      videoDevices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Camera ${index + 1}`;
+        cameraSelect.appendChild(option);
+      });
+
+      cameraSelect.onchange = () => {
+        startCamera(cameraSelect.value);
+      };
+
+      // Start with first camera
+      if (videoDevices.length > 0) {
+        startCamera(videoDevices[0].deviceId);
       }
     }
 
-    captureBtn.addEventListener('click', () => {
-      const context = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      canvas.style.display = 'block';
-      downloadBtn.style.display = 'inline-block';
-    });
+    async function startCamera(deviceId) {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
 
-    downloadBtn.addEventListener('click', () => {
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = 'captured_photo.png';
-      link.click();
-    });
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: deviceId } },
+          audio: false
+        });
+        document.getElementById('video').srcObject = currentStream;
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        alert("Error accessing camera: " + err.message);
+      }
+    }
 
-    window.addEventListener('load', startCamera);
+    // Ask for permission and load cameras
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(getCameras)
+      .catch(err => {
+        alert("Permission denied or no camera found: " + err.message);
+      });
   </script>
 </body>
 </html>
