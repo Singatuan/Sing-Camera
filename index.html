@@ -39,20 +39,19 @@
   <button id="capture">Snap It!</button>
   <button id="download" style="display:none;">Download Photo</button>
   <canvas id="canvas" style="display: none;"></canvas>
-  <div>
-    <button onclick="switchCamera()">Switch Camera</button>
-  </div>
+
   <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const captureBtn = document.getElementById('capture');
     const downloadBtn = document.getElementById('download');
-    let currentFacingMode = "user"; // "user" for front, "environment" for back
-    let videoElement = document.getElementById("video");
-    let currentStream = null;
-   
-  lasync function startCamera(facingMode) {
-      if (currentStream) {
+    const currentFacingMode = "user"; // "user" for front, "environment" for back
+
+    function switchCamera() {
+      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      startCamera(currentFacingMode);
+    }
+    if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
 
@@ -61,19 +60,6 @@
           video: {
             facingMode: { exact: facingMode } // Ensures front/back preference
           }
-        };
-
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoElement.srcObject = currentStream;
-      } catch (error) {
-        alert("Error accessing camera: " + error.message);
-      }
-    }
-
-    function switchCamera() {
-      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
-      startCamera(currentFacingMode);
-    }
     // Access camera
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
