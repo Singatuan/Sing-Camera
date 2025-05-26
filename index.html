@@ -1,65 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title> CameraSing (Front/Back)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Camer Sing-</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    video {
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid white;
+      margin-top: 20px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <h2>CameraSing </h2>
-  <select id="cameraSelect"></select>
-  <video id="video" autoplay playsinline width="640" height="480"></video>
-  <video id="video" autoplay playsinline></video><br>
-  <button id="capture">Snap It!</button>
-  <button id="download" style="display:none;">Download Photo</button>
-  <canvas id="canvas" style="display: none;"></canvas>
+  <h2>Camera Sing</h2>
+  <video id="video" autoplay playsinline></video>
+  
+  <div>
+    <button onclick="switchCamera()">Switch Camera</button>
+  </div>
 
   <script>
-    let currentStream;
+    let currentFacingMode = "user"; // "user" for front, "environment" for back
+    let videoElement = document.getElementById("video");
+    let currentStream = null;
 
-    async function getCameras() {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      const cameraSelect = document.getElementById('cameraSelect');
-
-      videoDevices.forEach((device, index) => {
-        const option = document.createElement('option');
-        option.value = device.deviceId;
-        option.text = device.label || `Camera ${index + 1}`;
-        cameraSelect.appendChild(option);
-      });
-
-      cameraSelect.onchange = () => {
-        startCamera(cameraSelect.value);
-      };
-
-      // Start with first camera
-      if (videoDevices.length > 0) {
-        startCamera(videoDevices[0].deviceId);
-      }
-    }
-
-    async function startCamera(deviceId) {
+    async function startCamera(facingMode) {
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
 
       try {
-        currentStream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: { exact: deviceId } },
-          audio: false
-        });
-        document.getElementById('video').srcObject = currentStream;
-      } catch (err) {
-        console.error("Error accessing camera:", err);
-        alert("Error accessing camera: " + err.message);
+        const constraints = {
+          video: {
+            facingMode: { exact: facingMode } // Ensures front/back preference
+          }
+        };
+
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElement.srcObject = currentStream;
+      } catch (error) {
+        alert("Error accessing camera: " + error.message);
       }
     }
 
-    // Ask for permission and load cameras
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(getCameras)
-      .catch(err => {
-        alert("Permission denied or no camera found: " + err.message);
-      });
+    function switchCamera() {
+      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      startCamera(currentFacingMode);
+    }
+<video id="video" autoplay playsinline></video>
+<script>
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      document.getElementById('video').srcObject = stream;
+    } catch (err) {
+      alert('Camera error: ' + err.message);
+    }
+  }
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    startCamera();
+  } 
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      startCamera(currentFacingMode);
+    } else {
+      alert("getUserMedia is not supported on this device or browser.");
+    }
   </script>
 </body>
 </html>
