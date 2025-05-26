@@ -51,15 +51,7 @@
       currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
       startCamera(currentFacingMode);
     }
-    if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-      }
-
-      try {
-        const constraints = {
-          video: {
-            facingMode: { exact: facingMode } // Ensures front/back preference
-          }
+  
     // Access camera
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
